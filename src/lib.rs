@@ -1,13 +1,27 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, Promise};
 
+mod events;
+
 pub const STORAGE_PRICE_PER_BYTE: u128 = 10_000_000_000_000_000_000;
 
 pub fn refund_storage(initial_storage: u64) {
     let current_storage = env::storage_usage();
     let attached_deposit = env::attached_deposit();
-    env::log_str(format!("current_storage {}", current_storage).as_str());
-    env::log_str(format!("attached_deposit {}", attached_deposit).as_str());
+
+    let storage_log: events::EventLog = events::EventLog {
+        standard: "nep171".to_string(),
+        version: "storage-0.1.0".to_string(),
+        event: events::SetInfoLog {
+            initial_storage: initial_storage,
+            current_storage: current_storage,
+            attached_deposit: attached_deposit,
+            memo: None,
+        },
+    };
+
+    env::log_str(&storage_log.to_string());
+
     let refund_amount = if current_storage > initial_storage {
         let required_deposit =
             u128::from(current_storage - initial_storage) * STORAGE_PRICE_PER_BYTE;

@@ -29,7 +29,6 @@ impl TokenOwners {
         let initial_storage = env::storage_usage();
         self.tokens_to_owners.insert(&token_id, &account_id);
         self.owners_to_tokens.insert(&account_id, &token_id);
-        env::log_str(format!("initial_storage {}", initial_storage).as_str());
         refund_storage(initial_storage);
     }
 
