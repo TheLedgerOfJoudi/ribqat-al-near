@@ -54,12 +54,29 @@ mod tests {
     use near_sdk::{testing_env, VMContext};
 
     #[test]
-    fn run() {
+    #[should_panic]
+    fn test_set_info_with_no_deposit() {
         let context: VMContext = VMContextBuilder::new().context;
         testing_env!(context);
         let mut contract: TokenOwners = TokenOwners::default();
         let token_id: String = "your_token".to_string();
         let owner_id: String = "you.testnet".to_string();
+        contract.set_info(&token_id, &owner_id);
+        let owner_of_token: String = contract.get_owner(&token_id);
+        let token_of_owner: String = contract.get_token(&owner_id);
+        assert_eq!(owner_of_token, owner_id);
+        assert_eq!(token_of_owner, token_id);
+    }
+
+    #[test]
+    fn test_set_info_with_deposit(){
+        let mut context: VMContext = VMContextBuilder::new().context;
+        let mut contract: TokenOwners = TokenOwners::default();
+        let token_id: String = "your_token".to_string();
+        let owner_id: String = "you.testnet".to_string();
+        pub const STORAGE_PRICE_PER_BYTE: u128 = 10_000_000_000_000_000_000;
+        context.attached_deposit = STORAGE_PRICE_PER_BYTE * 1000;
+        testing_env!(context.clone());
         contract.set_info(&token_id, &owner_id);
         let owner_of_token: String = contract.get_owner(&token_id);
         let token_of_owner: String = contract.get_token(&owner_id);
